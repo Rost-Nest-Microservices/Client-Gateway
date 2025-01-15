@@ -10,7 +10,7 @@ import {
   ParseUUIDPipe,
   Patch,
 } from '@nestjs/common';
-import { ORDER_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
 import { PaginationDto } from 'src/common';
 import { firstValueFrom } from 'rxjs';
@@ -18,21 +18,19 @@ import { firstValueFrom } from 'rxjs';
 @Controller('orders')
 export class OrdersController {
   constructor(
-    @Inject(ORDER_SERVICE) private readonly ordersClient: ClientProxy,
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersClient.send('createOrder', createOrderDto);
+    return this.client.send('createOrder', createOrderDto);
   }
 
   @Get()
   async findAll(@Query() orderPaginationDto: OrderPaginationDto) {
     try {
-      console.log(orderPaginationDto);
-
       const orders = await firstValueFrom(
-        this.ordersClient.send('findAllOrders', orderPaginationDto),
+        this.client.send('findAllOrders', orderPaginationDto),
       );
       return orders;
     } catch (error) {
@@ -44,7 +42,7 @@ export class OrdersController {
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
       const order = await firstValueFrom(
-        this.ordersClient.send('findOneOrder', id),
+        this.client.send('findOneOrder', id),
       );
       return order;
     } catch (error) {
@@ -59,7 +57,7 @@ export class OrdersController {
   ) {
     try {
       const orders = await firstValueFrom(
-        this.ordersClient.send('findAllOrders', {
+        this.client.send('findAllOrders', {
           ...paginationDto,
           status: statusDto.status,
         }),
@@ -77,7 +75,7 @@ export class OrdersController {
   ) {
     try {
       const order = await firstValueFrom(
-        this.ordersClient.send('changeOrderStatus', {
+        this.client.send('changeOrderStatus', {
           id,
           status: statusDto.status,
         }),
