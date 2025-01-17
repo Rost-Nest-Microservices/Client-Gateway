@@ -19,5 +19,5 @@ if (error) {
 
 export const envs = {
   port: envVars.PORT as number,
-  natsServers: envVars.NATS_SERVER
+  natsServers: envVars.NATS_SERVERS
 };
